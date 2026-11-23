@@ -30,10 +30,17 @@ public :
 
   virtual void initializeProperties() {
     WThermostat::initializeProperties();
+    
+    
+    this->ecoMode = WProperty::createOnOffProperty("ecoMode", "AWAY");
+    this->ecoMode -> setOnChange(std::bind(&WThermostat_BHT_002_GBLW::ecoModeToMcu, this, std::placeholders::_1));
+    this->ecoMode -> setVisibility(MQTT);
+    this->addProperty(ecoMode);    
+
   }
 
 protected :
-
+  WProperty* ecoMode; 
   virtual bool processStatusCommand(byte cByte, byte commandLength) {
 		//Status report from MCU
 		bool changed = false;
@@ -48,6 +55,9 @@ protected :
 				}
 			} else if (cByte == this->byteEcoMode) {
         if (commandLength == 0x05) {
+            newB = (receivedCommand[10] == 0x01);
+    	    changed = ((changed) || (newB != ecoMode ->getBoolean()));
+    	    this->ecoMode->setBoolean(newB);        
           //ecoMode -> ignore
           knownCommand = true;
         }
@@ -62,7 +72,7 @@ protected :
   void ecoModeToMcu(WProperty* property) {
    	if (!isReceivingDataFromMcu()) {
     	//55 AA 00 06 00 05 05 01 00 01 01
-    	byte dt = 0x00; //(this->ecoMode->getBoolean() ? 0x01 : 0x00);
+    	byte dt = (this->ecoMode->getBoolean() ? 0x01 : 0x00);
     	unsigned char deviceOnCommand[] = { 0x55, 0xAA, 0x00, 0x06, 0x00, 0x05,
        		                                this->byteEcoMode, 0x01, 0x00, 0x01, dt};
     	commandCharsToSerial(11, deviceOnCommand);
@@ -71,6 +81,7 @@ protected :
 
 private :
   byte byteEcoMode;
+  bool newB;
 };
 
 #endif

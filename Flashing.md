@@ -28,6 +28,9 @@ Following connections were working for me (refer to ESP-12E pinout):
 
 ## 3. Remove the power supply from thermostat during all flashing steps
 Flasing will fail, if the thermostat is still powered during this operation.
+
+Also flashing may fail due to MCU trashes ESP8266 RX line by periodicaly sending a command. So you need to broke trail on PCB. ( Do not forget to restore after flashing! )
+
 ## 4. Backup the original firmware
 Don't skip this. In case of malfunction you need the original firmware. Tasmota has also a great tutorial for the right esptool commands: https://github.com/arendst/Sonoff-Tasmota/wiki/Esptool. So the backup command is:
 

@@ -108,11 +108,14 @@ public :
     this->schedulesMode->setOnChange(std::bind(&WThermostat::schedulesModeToMcu, this, std::placeholders::_1));
     this->addProperty(schedulesMode);
     this->switchBackToAuto = network->getSettings()->setBoolean("switchBackToAuto", true);
+
     this->locked = WProperty::createOnOffProperty("locked", "Lock");
     this->locked->setOnChange(std::bind(&WThermostat::lockedToMcu, this, std::placeholders::_1));
     this->locked->setVisibility(MQTT);
     this->addProperty(locked);
+    
     this->completeDeviceState = network->getSettings()->setBoolean("sendCompleteDeviceState", true);
+    
     //Heating Relay and State property
     this->state = nullptr;
     this->supportingHeatingRelay = network->getSettings()->setBoolean("supportingHeatingRelay", true);
@@ -333,6 +336,7 @@ protected :
   byte byteTemperatureFloor;
   byte byteSchedulesMode;
   byte byteLocked;
+  byte byteEcoMode;
   byte byteSchedules;
   byte byteSchedulingPosHour;
   byte byteSchedulingPosMinute;
@@ -495,6 +499,7 @@ protected :
         locked->setBoolean(newB);
         knownCommand = true;
       }
+
     } else if (cByte == byteSchedules) {
       this->schedulesReceived = this->processStatusSchedules(commandLength);
       knownCommand = this->schedulesReceived;
