@@ -12,7 +12,7 @@
 #endif
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <Time.h>
+//#include <Time.h>
 #include <TimeLib.h>
 #include "WDevice.h"
 #include "WNetwork.h"
@@ -29,6 +29,8 @@ const byte DST_WEEKDAY = 6;
 const byte DST_HOUR = 7;
 const byte *DEFAULT_DST_RULE = (const byte[]){10, 0, 0, 3, 3, 0, 0, 2};
 const byte *DEFAULT_NIGHT_SWITCHES = (const byte[]){22, 00, 7, 00};
+
+WiFiClient client;
 
 class WClock: public WDevice {
 public:
@@ -139,7 +141,7 @@ public:
 				String request = timeZoneServer->c_str();
 				network->debug(F("Time zone update via '%s'"), request.c_str());
 				HTTPClient http;
-				http.begin(request);
+				http.begin(client,request);
 				int httpCode = http.GET();
 				if (httpCode > 0) {
 					WJsonParser parser;
